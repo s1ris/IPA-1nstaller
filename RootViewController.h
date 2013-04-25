@@ -1,11 +1,10 @@
 @interface RootViewController: UIViewController < UITableViewDelegate, UITableViewDataSource, UIActionSheetDelegate > {
     
-    NSMutableArray *array;
+    NSMutableArray *files;
     NSString *theOne;
-    NSString *metaD;
+    NSString *metaData;
     NSString *deleteIpa;
     UIActionSheet *sheet;
-    UIAlertView *alert;
     UINavigationBar *navBar;
     UINavigationBar *myBarA;
     UISwitch *mySwitch;
