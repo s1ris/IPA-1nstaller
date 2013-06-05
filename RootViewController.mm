@@ -1,266 +1,234 @@
 #import "RootViewController.h"
-#import "UIKit/UIKit.h"
-#import "QuartzCore/QuartzCore.h"
+#include <UIKit/UIKit.h>
+#include <QuartzCore/QuartzCore.h>
+#include <Foundation/Foundation.h>
 
 @implementation RootViewController
 - (void)loadView {
-        self.view =[[[UIView alloc] initWithFrame:[[UIScreen mainScreen] applicationFrame]] autorelease];
-        self.view.backgroundColor =[UIColor clearColor];
-        navBar = [[UINavigationBar alloc] init];
-        navBar.frame = CGRectMake (0, 0, self.view.frame.size.width, 44);
-        navBar.tintColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:1.0];
-        UINavigationItem *navItem =[[[UINavigationItem alloc] initWithTitle:@"IPA Installer"] autorelease];
-        UIBarButtonItem *rightButton =[[[UIBarButtonItem alloc] initWithTitle: @"Reload" style: UIBarButtonItemStylePlain target: self action:@selector (rightButtonPressed)] autorelease];
-        navItem.rightBarButtonItem = rightButton;
-        UIBarButtonItem *leftButton =[[[UIBarButtonItem alloc] initWithTitle: @"Settings" style: UIBarButtonItemStylePlain target: self action:@selector (leftButtonPressed)] autorelease];
-        navItem.leftBarButtonItem = leftButton;
-        navBar.barStyle = UIBarStyleDefault;
-        navBar.items =[NSArray arrayWithObject:navItem];
-        [self.view addSubview:navBar];
-        myTable =[[UITableView alloc] initWithFrame: CGRectMake (0, 44, self.view.frame.size.width, self.view.frame.size.height) style:UITableViewStyleGrouped];
-        [myTable setDataSource:self];
-        [myTable setDelegate:self];
-        [self.view addSubview:myTable];
-        NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/var/mobile/Documents" error:nil];
-        files = [[NSMutableArray arrayWithArray:[dirContents filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"pathExtension IN %@", @".ipa", nil]]] retain];
-        [myTable setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
-        [navBar setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
-        view = [[[UIView alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2 - 60, self.view.frame.size.height/2 - 60, 120, 120)] autorelease];
-        view.hidden = YES;
-        view.backgroundColor = [UIColor blackColor];
-        view.layer.cornerRadius = 5;
-        [view setAutoresizingMask:UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin];
-        UIActivityIndicatorView *activityIndicatior = [[UIActivityIndicatorView alloc]initWithFrame:CGRectMake(37, 37, 45, 45)];
-        [activityIndicatior setActivityIndicatorViewStyle:UIActivityIndicatorViewStyleWhiteLarge];
-        [view addSubview:activityIndicatior];      
-        [activityIndicatior startAnimating];
-        [self.view addSubview:view];
-
-        // settings view
-
-        viewA =[[[UIView alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2 - 160, self.view.frame.size.height/2 - 145, 320, 290)] autorelease];
-        viewA.backgroundColor =[UIColor grayColor];
-        viewA.layer.cornerRadius = 10;
-        [viewA setAutoresizingMask:UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin];
-        myBarA =[[UINavigationBar alloc] init];
-        myBarA.frame = CGRectMake (0, 0, viewA.frame.size.width, 44);
-        myBarA.tintColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:1.0];
-        UINavigationItem *navItemA =[[[UINavigationItem alloc] initWithTitle:@"Settings"] autorelease];
-        myBarA.barStyle = UIBarStyleDefault;
-        UIBarButtonItem *leftButtonA =[[[UIBarButtonItem alloc] initWithTitle: @"Back" style: UIBarButtonItemStylePlain target: self action:@selector (leftButtonAPressed)] autorelease];
-        navItemA.leftBarButtonItem = leftButtonA;
-        myBarA.items =[NSArray arrayWithObject:navItemA];
-        myBarA.layer.cornerRadius = 10;
-        [viewA addSubview:myBarA];
-        [myBarA setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
-        mySwitch = [[UISwitch alloc] initWithFrame:CGRectMake(110, 120, 0, 0)];
-        [mySwitch addTarget:self action:@selector(switchMethod) forControlEvents:UIControlEventValueChanged];
-        mySwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:@"SwitchStatus"];
-        [viewA addSubview:mySwitch];
-        [mySwitch release];
-        mySwitchA = [[UISwitch alloc] initWithFrame:CGRectMake(110, 220, 0, 0)];
-        [mySwitchA addTarget:self action:@selector(switchMethodA) forControlEvents:UIControlEventValueChanged];
-        mySwitchA.on = [[NSUserDefaults standardUserDefaults] boolForKey:@"SwitchStatusA"];
-        [viewA addSubview:mySwitchA];
-        UILabel *myLabel = [[UILabel alloc] initWithFrame:CGRectMake(viewA.frame.size.width/2 - 150, viewA.frame.size.height/2 - 80, 300, 44)];
-        myLabel.text = @"Remove MetaData";
-        myLabel.backgroundColor = [UIColor whiteColor];
-        myLabel.textColor = [UIColor blackColor];
-        myLabel.textAlignment = UITextAlignmentCenter;
-        myLabel.layer.cornerRadius = 6;
-        [myLabel setAutoresizingMask:UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin];
-        [viewA addSubview:myLabel];
-        UILabel *myLabelA = [[UILabel alloc] initWithFrame:CGRectMake(viewA.frame.size.width/2 - 150, viewA.frame.size.height/2 + 20, 300, 44)];
-        myLabelA.text = @"Delete After Install";
-        myLabelA.backgroundColor = [UIColor whiteColor];
-        myLabel.textColor = [UIColor blackColor];
-        myLabelA.textAlignment = UITextAlignmentCenter;
-        myLabelA.layer.cornerRadius = 6;
-        [myLabelA setAutoresizingMask:UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin];
-        [viewA addSubview:myLabelA];
-        [self.view addSubview:viewA];
-        viewA.hidden = YES;
-        [myLabel release];
-        [myLabelA release];     
+        self.view =[[[UIView alloc] initWithFrame:[[UIScreen mainScreen] applicationFrame]] autorelease];
+        self.view.backgroundColor =[UIColor grayColor];
+        navBar = [[UINavigationBar alloc] init];
+        navBar.frame = CGRectMake (0, 0, self.view.frame.size.width, 44);
+        UINavigationItem *navItem =[[[UINavigationItem alloc] initWithTitle:@"IPA 1nstaller"] autorelease];
+        navBar.barStyle = UIBarStyleDefault;
+        navBar.items =[NSArray arrayWithObject:navItem];
+        [self.view addSubview:navBar];
+        myTable =[[UITableView alloc] initWithFrame: CGRectMake (0, 44, self.view.frame.size.width, self.view.frame.size.height) style:UITableViewStyleGrouped];
+        [myTable setDataSource:self];
+        [myTable setDelegate:self];
+        [self.view addSubview:myTable];
+        NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/var/mobile/Documents" error:nil];
+        files = [[NSMutableArray arrayWithArray:[dirContents filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"pathExtension IN %@", @".ipa", nil]]] retain];
+        [myTable setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
+        [navBar setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+        overlay = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)] autorelease];
+        overlay.hidden = YES;
+        overlay.backgroundColor = [UIColor blackColor];
+        overlay.alpha = .6;
+        [overlay setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
+        [self.view addSubview:overlay];
+        view = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 500 , 500)] autorelease];
+        view.hidden = YES;
+        view.backgroundColor = [UIColor blackColor];
+        view.alpha = 0.5;
+        view.layer.cornerRadius = 5;
+        [view setAutoresizingMask:UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin];
+        [self.view addSubview:view];
+        activityindicator1 = [[UIActivityIndicatorView alloc]initWithFrame:CGRectMake(250, 250, 0, 0)];
+        [activityindicator1 setActivityIndicatorViewStyle:UIActivityIndicatorViewStyleWhiteLarge];
+        [view addSubview:activityindicator1];
+        [activityindicator1 startAnimating];
 }
 
 -(BOOL) shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation) interfaceOrientation {
-        return YES;  
+        return YES;  
 }
 
--(BOOL) tableView:(UITableView *) tableView canEditRowAtIndexPath:(NSIndexPath *) indexPath {
-        return YES;
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+        return YES;
+}
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+        return 60;
 }
 
 -(NSInteger) numberOfSectionsInTableView:(UITableView *) tableView {
-        return 1;
+        return 1;
 }
 
 -(NSInteger) tableView:(UITableView *) tableView numberOfRowsInSection:(NSInteger) section {
-        switch (section) 
-        {
-                case 0:
-                return[files count];
-                break;
-                default:
-                break;
-        }
-        return -1;
+        switch (section) 
+        {
+                case 0:
+                return[files count];
+                break;
+                default:
+                break;
+        }
+        return -1;
 }
 
 -(UITableViewCell *) tableView:(UITableView *) tableView cellForRowAtIndexPath:(NSIndexPath *) indexPath {
-        UITableViewCell *cell =[tableView dequeueReusableCellWithIdentifier: [NSString stringWithFormat:@"Cell %i", indexPath.section]];
-        if (cell == nil)
-        {
-                cell =[[[UITableViewCell alloc] initWithStyle: UITableViewCellStyleValue1 reuseIdentifier: [NSString stringWithFormat:@"Cell %i", indexPath.section]] autorelease];
-        }
-        switch (indexPath.section)
-                {
-                case 0:
-                        {
-                        cell.textLabel.text =[files objectAtIndex:indexPath.row];
-                        }
-                break;
-                default:
-                break;
-        }
-        cell.selectionStyle = UITableViewCellSelectionStyleBlue;
-        return cell;
+        UITableViewCell *cell =[tableView dequeueReusableCellWithIdentifier: [NSString stringWithFormat:@"Cell %i", indexPath.section]];
+        if (cell == nil)
+        {
+                cell =[[[UITableViewCell alloc] initWithStyle: UITableViewCellStyleValue1 reuseIdentifier: [NSString stringWithFormat:@"Cell %i", indexPath.section]] autorelease];
+        }
+        switch (indexPath.section)
+                {
+                case 0:
+                        {
+                        cell.textLabel.text =[files objectAtIndex:indexPath.row];
+                        }
+                break;
+                default:
+                break;
+        }
+        cell.selectionStyle = UITableViewCellSelectionStyleBlue;
+        return cell;
 }
 
 -(void) tableView:(UITableView *) tableView didSelectRowAtIndexPath:(NSIndexPath *) indexPath {
-        theOne =[files objectAtIndex:indexPath.row];
-        sheet =[[UIActionSheet alloc] initWithTitle: [files objectAtIndex: indexPath.row] delegate: self cancelButtonTitle: nil destructiveButtonTitle: @"Cancel" otherButtonTitles:@"Install", nil];
-        [sheet showInView:self.view];
-        [sheet release];
-        [tableView deselectRowAtIndexPath: indexPath animated:YES];
-}
-
--(void) switchMethod {
-        if(mySwitch.on)
-        {
-        NSUserDefaults *switchSettings = [NSUserDefaults standardUserDefaults];
-        [switchSettings setBool:YES forKey:@"SwitchStatus"];
-        [switchSettings synchronize];
-        }
-        else
-        {    
-        NSUserDefaults *switchSettings = [NSUserDefaults standardUserDefaults];
-        [switchSettings setBool:NO forKey:@"SwitchStatus"];
-        [switchSettings synchronize];
-        }
-}
-
--(void) switchMethodA {
-    if(mySwitchA.on)
-        {
-        NSUserDefaults *switchSettings = [NSUserDefaults standardUserDefaults];
-        [switchSettings setBool:YES forKey:@"SwitchStatusA"];
-        [switchSettings synchronize];
-        }
-        else
-        {
-        NSUserDefaults *switchSettings = [NSUserDefaults standardUserDefaults];
-        [switchSettings setBool:NO forKey:@"SwitchStatusA"];
-        [switchSettings synchronize];
-        }
-}
-
--(void) leftButtonPressed {
-    viewA.hidden = NO;
-}
-
--(void) leftButtonAPressed {
-    viewA.hidden = YES;
-}
-
--(void) rightButtonPressed {
-        NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/var/mobile/Documents" error:nil];
-        files = [[NSMutableArray arrayWithArray:[dirContents filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"pathExtension IN %@", @".ipa", nil]]] retain];
-        [myTable reloadData];
+        theOne =[files objectAtIndex:indexPath.row];
+        sheet =[[UIActionSheet alloc] initWithTitle: [files objectAtIndex: indexPath.row] delegate: self cancelButtonTitle: nil destructiveButtonTitle: @"Cancel" otherButtonTitles:@"Install", nil];
+        [sheet showInView:self.view];
+        [sheet release];
+        [tableView deselectRowAtIndexPath: indexPath animated:YES];
 }
 
 -(void) tableView:(UITableView *) tableView commitEditingStyle:(UITableViewCellEditingStyle) editingStyle forRowAtIndexPath:(NSIndexPath *) indexPath {
-        if (editingStyle == UITableViewCellEditingStyleDelete)
-                {
-                NSString *userFile =[files objectAtIndex:indexPath.row];
-                NSString *docPath = @"/var/mobile/Documents/";
-                NSString *delPath =[NSString stringWithFormat:@"%@%@", docPath, userFile];
-                NSFileManager *fileManager =[NSFileManager defaultManager];
-                [fileManager removeItemAtPath: delPath error:nil];
-                NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/var/mobile/Documents" error:nil];
-                files = [[NSMutableArray arrayWithArray:[dirContents filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"pathExtension IN %@", @".ipa", nil]]] retain];
-                [myTable reloadData];
-                }
-    
+    if (editingStyle == UITableViewCellEditingStyleDelete){
+    [myTable beginUpdates];
+    NSString *userFile =[files objectAtIndex:indexPath.row];
+    NSString *docPath = @"/var/mobile/Documents/";
+    NSString *delPath =[NSString stringWithFormat:@"%@%@", docPath, userFile];
+    NSFileManager *fileManager =[NSFileManager defaultManager];
+    [fileManager removeItemAtPath: delPath error:nil];
+    [files removeObjectAtIndex:indexPath.row];
+    [myTable deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationRight];
+    NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/var/mobile/Documents" error:nil];
+    files = [[NSMutableArray arrayWithArray:[dirContents filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"pathExtension IN %@", @".ipa", nil]]] retain];
+    [myTable reloadData];
+    [myTable endUpdates];
+                }  
 }
 
 -(void) installIPA {
-        if(mySwitch.on)
-                {
-                metaData = @" -r";
-                }
-        else
-                {
-                metaData = @"";
-                }
-        if(mySwitchA.on)
-                {
-                deleteIpa = @" -d";
-                }
-        else
-                {
-                deleteIpa = @"";
-                }
-        NSString *baseDirectory = @" \"/var/mobile/Documents/";
-        NSString *quoteString = @"\"";
-        NSString *ipaPath =[NSString stringWithFormat:@"%@%@%@", baseDirectory, theOne, quoteString];
-        NSString *installScript = @"ipainstaller -f";
-        NSString *scriptParameters =[NSString stringWithFormat:@"%@%@%@", installScript, metaData, deleteIpa];
-        NSString *finalInstall =[NSString stringWithFormat:@"%@%@", scriptParameters, ipaPath];
-        system ([finalInstall UTF8String]);
+        NSDictionary *dict = [[NSDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.s1ris.ipa1nstallersettings.plist"];
+        if([[dict objectForKey:@"delete"] boolValue]) {
+                deleteipa = @" -d";
+        }
+        else {
+                deleteipa = @"";
+        }
+        if([[dict objectForKey:@"metadata"] boolValue]) {
+                metadata = @" -r";
+        }
+        else {
+                metadata = @"";
+        }
+        if([[dict objectForKey:@"cleaninstall"] boolValue]) {
+               cleaninstall = @" -c";
+        }
+        else {
+                cleaninstall = @"";
+        }
+        navBar.userInteractionEnabled = NO;
+        myTable.userInteractionEnabled = NO;
+        view.hidden = NO;
+        NSString *baseDirectory = @" \"/var/mobile/Documents/";
+        NSString *quoteString = @"\"";
+        NSString *ipaPath =[NSString stringWithFormat:@"%@%@%@", baseDirectory, theOne, quoteString];
+        NSString *installScript = @"ipainstaller -f";
+        NSString *scriptParameters =[NSString stringWithFormat:@"%@%@%@%@", installScript, deleteipa, metadata, cleaninstall];
+        NSString *finalInstall =[NSString stringWithFormat:@"%@%@", scriptParameters, ipaPath];
+        system ([finalInstall UTF8String]);
 }
 
 -(void) beginInstall {
-        
-        NSOperationQueue *q = [[NSOperationQueue alloc] init];
-        NSInvocationOperation *operation = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(installIPA) object:nil];
-        NSInvocationOperation *operation1 = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(dismissView) object:nil];
-        [operation1 addDependency:operation];
-        [q addOperation:operation1];
-        [operation release];
-        [q addOperation:operation];
-        [operation1 release];
+        navBar.userInteractionEnabled = NO;
+        myTable.userInteractionEnabled = NO;
+        view.hidden = NO;
+        NSOperationQueue *q = [[NSOperationQueue alloc] init];
+        NSInvocationOperation *operation = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(installIPA) object:nil];
+        NSInvocationOperation *operation1 = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(dismissView) object:nil];
+        [operation1 addDependency:operation];
+        [q addOperation:operation1];
+        [operation release];
+        [q addOperation:operation];
+        [operation1 release];
+        [q release];
 }
 
 -(void) dismissView {
-                NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/var/mobile/Documents" error:nil];
-                files = [[NSMutableArray arrayWithArray:[dirContents filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"pathExtension IN %@", @".ipa", nil]]] retain];
-                [myTable reloadData];
-                view.hidden = YES;
+                
+                overlay.hidden = YES;
+                view.hidden = YES;
+                view.alpha = 0.5;
+                CGRect frame = view.frame;
+                frame.size.height += 400.0;
+                frame.origin.y -= self.view.frame.size.width/2 - 50;
+                frame.size.width += 400.0;
+                frame.origin.x -= self.view.frame.size.width/2 - 50;
+                view.frame = frame;
+                navBar.userInteractionEnabled = YES;
+                myTable.userInteractionEnabled = YES;
+                NSArray *dirContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:@"/var/mobile/Documents" error:nil];
+                files = [[NSMutableArray arrayWithArray:[dirContents filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"pathExtension IN %@", @".ipa", nil]]] retain];
+                [myTable reloadData];
 }
 
 -(void) actionSheet:(UIActionSheet *) actionSheet didDismissWithButtonIndex:(NSInteger) buttonIndex {
-        if (buttonIndex ==[actionSheet cancelButtonIndex])
-                {
-                }
-        else if (buttonIndex == 0)
-                {
-                }
-        else if (buttonIndex == 1)
-                {
-                view.hidden = NO;
-                [self beginInstall];
-                }
+        if (buttonIndex ==[actionSheet cancelButtonIndex]) {
+                }
+        else if (buttonIndex == 0){
+                }
+        else if (buttonIndex == 1) {
+                navBar.userInteractionEnabled = NO;
+                myTable.userInteractionEnabled = NO;
+                
+                
+                [UIView beginAnimations:nil context:nil];
+                [UIView setAnimationDuration:.7];
+                [UIView setAnimationBeginsFromCurrentState:YES];
+
+                overlay.hidden = NO;
+                view.hidden = NO;
+                view.alpha = 1;
+                CGRect frame = view.frame;
+                frame.size.height -= 400;
+                frame.origin.y += self.view.frame.size.width/2 - 50;
+                frame.size.width -= 400;
+                frame.origin.x += self.view.frame.size.height/2 - 50;
+                view.frame = frame;
+
+                CGRect frame1 = activityindicator1.frame;
+                frame1.origin.y = view.frame.size.width/2;
+                frame1.origin.x = view.frame.size.height/2;
+                activityindicator1.frame = frame1;
+                
+                [UIView commitAnimations];
+                [self beginInstall];
+                }
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+
+UITouch *touch = [touches anyObject];
+
+if ([touch view] == view) {
+    CGPoint location = [touch locationInView:self.view];
+    view.center = location;
+    return;
+   }
 }
 
 -(void) dealloc {
-        [myTable release];
-        [files release];
-        [sheet release];
-        [view release];
-        [viewA release];
-        [super dealloc];
+        [myTable release];
+        [files release];
+        [sheet release];
+        [view release];
+        [super dealloc];
 }
 
 @end
