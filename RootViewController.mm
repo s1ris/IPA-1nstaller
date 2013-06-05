@@ -28,11 +28,11 @@
         [overlay setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
         [self.view addSubview:overlay];
         view = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 500 , 500)] autorelease];
-        view.hidden = YES;
         view.backgroundColor = [UIColor blackColor];
         view.alpha = 0.5;
         view.layer.cornerRadius = 5;
         [view setAutoresizingMask:UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin];
+        view.hidden = YES;
         [self.view addSubview:view];
         activityindicator1 = [[UIActivityIndicatorView alloc]initWithFrame:CGRectMake(250, 250, 0, 0)];
         [activityindicator1 setActivityIndicatorViewStyle:UIActivityIndicatorViewStyleWhiteLarge];
@@ -167,9 +167,9 @@
                 view.alpha = 0.5;
                 CGRect frame = view.frame;
                 frame.size.height += 400.0;
-                frame.origin.y -= self.view.frame.size.width/2 - 50;
+                frame.origin.y = 0;
                 frame.size.width += 400.0;
-                frame.origin.x -= self.view.frame.size.width/2 - 50;
+                frame.origin.x = 0;
                 view.frame = frame;
                 navBar.userInteractionEnabled = YES;
                 myTable.userInteractionEnabled = YES;
@@ -184,22 +184,30 @@
         else if (buttonIndex == 0){
                 }
         else if (buttonIndex == 1) {
+                UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
                 navBar.userInteractionEnabled = NO;
                 myTable.userInteractionEnabled = NO;
                 
-                
                 [UIView beginAnimations:nil context:nil];
-                [UIView setAnimationDuration:.7];
+                [UIView setAnimationDuration:.5];
                 [UIView setAnimationBeginsFromCurrentState:YES];
 
                 overlay.hidden = NO;
-                view.hidden = NO;
                 view.alpha = 1;
                 CGRect frame = view.frame;
                 frame.size.height -= 400;
-                frame.origin.y += self.view.frame.size.width/2 - 50;
                 frame.size.width -= 400;
-                frame.origin.x += self.view.frame.size.height/2 - 50;
+
+                if(orientation == UIInterfaceOrientationPortrait ||  orientation == UIInterfaceOrientationPortraitUpsideDown) {
+                frame.origin.y = self.view.frame.size.height/2 - 50;
+                frame.origin.x = self.view.frame.size.width/2 - 50;
+}
+                if(orientation == UIInterfaceOrientationLandscapeRight || orientation == UIInterfaceOrientationLandscapeLeft) {
+                frame.origin.y = self.view.frame.size.width/2 - 50;
+                frame.origin.x = self.view.frame.size.height/2 - 50;
+
+
+}
                 view.frame = frame;
 
                 CGRect frame1 = activityindicator1.frame;
@@ -207,6 +215,7 @@
                 frame1.origin.x = view.frame.size.height/2;
                 activityindicator1.frame = frame1;
                 
+                view.hidden = NO;
                 [UIView commitAnimations];
                 [self beginInstall];
                 }
